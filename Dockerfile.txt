@@ -1,0 +1,22 @@
+# --- ETAPA 1: Construcción (Build) ---
+# Usamos una imagen de Maven para compilar tu código Java
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+# Copiamos todo el código
+COPY . .
+# Compilamos el proyecto (esto genera el archivo .jar)
+RUN mvn clean package -DskipTests
+
+# --- ETAPA 2: Ejecución (Run) ---
+# Usamos una imagen de Java (JRE) mucho más ligera y optimizada
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
+# Copiamos SOLO el archivo .jar compilado desde la etapa anterior
+# Ajusta 'tu-proyecto.jar' por el nombre real de tu archivo en la carpeta target
+COPY --from=build /app/target/*.jar app.jar
+
+# Exponemos el puerto que usa tu API (usualmente 8080)
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]
