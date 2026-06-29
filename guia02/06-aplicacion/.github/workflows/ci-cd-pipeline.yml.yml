@@ -35,7 +35,6 @@ jobs:
 
       - name: Run Snyk Security Test
         id: snyk
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
@@ -85,7 +84,6 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
 
       - name: Run PMD Static Analysis
-        continue-on-error: true
         run: |
           echo "Running PMD static analysis..."
           mvn pmd:check -Dpmd.failurePriority=1 || true
@@ -100,17 +98,16 @@ jobs:
 
       - name: Run SonarQube Analysis
         id: sonar
-        continue-on-error: true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           echo "Running SonarQube analysis..."
           if [ -n "$SONAR_TOKEN" ]; then
-            mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN || true
+            mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true
             echo "gate=PASSED" >> $GITHUB_OUTPUT
           else
-            echo "SonarQube not configured, skipping..."
-            echo "gate=SKIPPED" >> $GITHUB_OUTPUT
+            echo "::error::SonarQube token not configured"
+            exit 1
           fi
 
   # ----------------------------------------------------------
@@ -137,7 +134,6 @@ jobs:
 
       - name: Run Tests with Coverage
         id: coverage
-        continue-on-error: true
         run: |
           echo "Running tests with coverage..."
           mvn test jacoco:report || true
@@ -148,7 +144,7 @@ jobs:
             echo "Test coverage: $COVERAGE%"
 
             if [ "$COVERAGE" -lt 80 ]; then
-              echo "::warning::Test coverage ($COVERAGE%) is below threshold (80%)"
+              echo "::error::Test coverage ($COVERAGE%) is below threshold (80%)"
               exit 1
             fi
           else
@@ -178,7 +174,7 @@ jobs:
           echo "✅ README.md exists"
 
           SENSITIVE_FILES=$(find . -name "*.env" -o -name "credentials.json" -o -name "*.pem" -o -name "*.key" | head -5)
-          if [ -n "$SENSITIVE_FILES" ]; then
+          if [ -n "$SENSFILES" ]; then
             echo "::error::Sensitive files found:"
             echo "$SENSITIVE_FILES"
             exit 1
@@ -192,7 +188,7 @@ jobs:
           echo "✅ All compliance checks passed"
 
   # ============================================================
-  # FASE 2: Build (solo si quality gates pasan)
+  # FASE 2: Build (solo si todos los quality gates pasan)
   # ============================================================
   build:
     name: "🔨 Build & Push a ECR"
@@ -255,7 +251,7 @@ jobs:
           echo "✔ Push completado"
 
   # ============================================================
-  # FASE 3: Deploy (solo si build exitoso)
+  # FASE 3: Deploy (solo si el build fue exitoso)
   # ============================================================
   deploy:
     name: "🚀 Deploy a EKS"
@@ -302,8 +298,6 @@ jobs:
       - name: Login a Amazon ECR
         id: login-ecr-deploy
         uses: aws-actions/amazon-ecr-login@v2
-
-
 
       - name: Actualizar imagen del deployment
         env:
