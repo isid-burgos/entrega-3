@@ -21,6 +21,9 @@ jobs:
   security-scan:
     name: "🔒 Security Scan"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guia02/06-aplicacion
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,6 +68,9 @@ jobs:
   quality-check:
     name: "📊 Quality Check"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guia02/06-aplicacion
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,6 +109,7 @@ jobs:
         run: |
           echo "Running SonarQube analysis..."
           if [ -n "$SONAR_TOKEN" ]; then
+            # Al correr dentro de la carpeta, lee tu archivo sonar-project.properties automaticamente
             mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true
             echo "gate=PASSED" >> $GITHUB_OUTPUT
           else
@@ -116,6 +123,9 @@ jobs:
   test-coverage:
     name: "🧪 Test Coverage"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guia02/06-aplicacion
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -181,10 +191,6 @@ jobs:
           fi
           echo "✅ No sensitive files found"
 
-          if [ -f "Dockerfile" ]; then
-            echo "✅ Dockerfile exists"
-          fi
-
           echo "✅ All compliance checks passed"
 
   # ============================================================
@@ -200,6 +206,9 @@ jobs:
       needs.test-coverage.result == 'success' &&
       needs.compliance-check.result == 'success'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guia02/06-aplicacion
     outputs:
       IMAGE_TAG: ${{ steps.export.outputs.IMAGE_TAG }}
       ECR_REGISTRY: ${{ steps.export.outputs.ECR_REGISTRY }}
