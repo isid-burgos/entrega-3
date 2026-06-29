@@ -38,6 +38,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
+          cd guia02/06-aplicacion
           echo "Running Snyk security scan..."
           snyk test --all-projects --severity-threshold=high || true
 
@@ -85,6 +86,7 @@ jobs:
 
       - name: Run PMD Static Analysis
         run: |
+          cd guia02/06-aplicacion
           echo "Running PMD static analysis..."
           mvn pmd:check -Dpmd.failurePriority=1 || true
 
@@ -101,6 +103,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          cd guia02/06-aplicacion
           echo "Running SonarQube analysis..."
           if [ -n "$SONAR_TOKEN" ]; then
             mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true
@@ -135,6 +138,7 @@ jobs:
       - name: Run Tests with Coverage
         id: coverage
         run: |
+          cd guia02/06-aplicacion
           echo "Running tests with coverage..."
           mvn test jacoco:report || true
 
@@ -180,10 +184,6 @@ jobs:
             exit 1
           fi
           echo "✅ No sensitive files found"
-
-          if [ -f "Dockerfile" ]; then
-            echo "✅ Dockerfile exists"
-          fi
 
           echo "✅ All compliance checks passed"
 
@@ -234,9 +234,10 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.export.outputs.ECR_REGISTRY }}
         run: |
+          cd guia02/06-aplicacion
           echo "Construyendo imagen..."
           docker build \
-            -t $ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG} \
+            -t $ECR_REGISTRY/${ECR_REPO_BACKEND}:${{ steps.export.outputs.IMAGE_TAG }} \
             -t $ECR_REGISTRY/${ECR_REPO_BACKEND}:latest \
             .
           echo "✔ Build completado"
@@ -245,8 +246,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.export.outputs.ECR_REGISTRY }}
         run: |
+          cd guia02/06-aplicacion
           echo "Publicando en ECR..."
-          docker push $ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG}
+          docker push $ECR_REGISTRY/${ECR_REPO_BACKEND}:${{ steps.export.outputs.IMAGE_TAG }}
           docker push $ECR_REGISTRY/${ECR_REPO_BACKEND}:latest
           echo "✔ Push completado"
 
