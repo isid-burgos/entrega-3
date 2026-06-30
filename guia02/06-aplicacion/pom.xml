@@ -66,8 +66,8 @@
         <jacoco.report.path>${project.build.directory}/site/jacoco/jacoco.xml</jacoco.report.path>
 
         <!-- ── SonarCloud ───────────────────────────────────────────────────── -->
-        <sonar.projectKey>mauriciovelasquezduoc_202601_DOY0101-003D_sprintboot_gradle</sonar.projectKey>
-        <sonar.organization>mauriciovelasquezduoc</sonar.organization>
+        <sonar.projectKey>isid-burgos_entrega-3</sonar.projectKey>
+        <sonar.organization>isid-burgos</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.exclusions>.github/**,k8s/**,docs/**</sonar.exclusions>
