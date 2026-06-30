@@ -106,7 +106,7 @@ jobs:
           cd guia02/06-aplicacion
           echo "Running SonarQube analysis..."
           if [ -n "$SONAR_TOKEN" ]; then
-            mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true
+            mvn verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true
             echo "gate=PASSED" >> $GITHUB_OUTPUT
           else
             echo "::error::SonarQube token not configured"
@@ -178,7 +178,7 @@ jobs:
           echo "✅ README.md exists"
 
           SENSITIVE_FILES=$(find . -name "*.env" -o -name "credentials.json" -o -name "*.pem" -o -name "*.key" | head -5)
-          if [ -n "$SENSFILES" ]; then
+          if [ -n "$SENSITIVE_FILES" ]; then
             echo "::error::Sensitive files found:"
             echo "$SENSITIVE_FILES"
             exit 1
