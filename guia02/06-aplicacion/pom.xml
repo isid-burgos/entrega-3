@@ -39,7 +39,20 @@
         <spotless.version>2.43.0</spotless.version>
         <pmd.version>3.26.0</pmd.version>
         <cucumber.version>7.20.1</cucumber.version>
-        <junit-platform.version>1.11.4</junit-platform.version>
+        <!--
+            NOTA: se eliminó <junit-platform.version>1.11.4</junit-platform.version>.
+            spring-boot-starter-parent ya gestiona la versión correcta y
+            compatible de junit-platform-launcher / junit-platform-suite /
+            junit-platform-suite-engine junto con la versión de junit-jupiter
+            que trae spring-boot-starter-test. Fijar manualmente una versión
+            distinta provocaba el error:
+              "TestEngine with ID 'junit-jupiter' failed to discover tests"
+            durante surefire, por mezclar versiones del JUnit Platform.
+            Si en algún momento necesitas forzar una versión específica,
+            hazlo a través de la propiedad que gestiona el BOM de Spring Boot:
+              <junit.jupiter.version>5.X.X</junit.jupiter.version>
+            y deja que el resto del Platform se resuelva en cascada.
+        -->
         <springdoc.version>2.8.17</springdoc.version>
         <rewrite-migrate.version>3.31.0</rewrite-migrate.version>
         <rewrite-spring.version>6.13.0</rewrite-spring.version>
@@ -142,22 +155,27 @@
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!--
+            ── JUnit Platform ──────────────────────────────────────────────
+            Sin <version> explícita: la resuelve spring-boot-starter-parent
+            en conjunto con junit-jupiter (vía spring-boot-starter-test),
+            evitando el conflicto de versiones que rompía el discovery
+            de tests en surefire.
+        -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-engine</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
 
