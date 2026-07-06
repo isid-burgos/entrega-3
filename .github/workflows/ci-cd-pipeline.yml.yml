@@ -285,7 +285,7 @@ jobs:
           echo "EKS_CLUSTER_NAME=$CLUSTER" >> $GITHUB_ENV
 
       - name: Instalar kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
         with:
           version: v1.29.0
 
